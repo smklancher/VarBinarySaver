@@ -1,68 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace VarBinarySaver
 {
     public partial class Form1 : Form
     {
+        private string _selectedCsvPath;
+        private string _outputDir;
+
         public Form1()
         {
             InitializeComponent();
+            btnSelectCsv.Click += BtnSelectCsv_Click;
+            SaveButton.Click += SaveButton_Click;
+            this.AllowDrop = true;
+            this.DragEnter += Form1_DragEnter;
+            this.DragDrop += Form1_DragDrop;
         }
-
-        private void SaveButton_Click(object sender, EventArgs e)
-        {
-            foreach(var s in ReadLines(TextBox.Text))
-            {
-                SaveLine(s);
-            }
-        }
-
-        private void SaveLine(string line)
-        {
-            var split = line.Split(new[] { "0x" }, StringSplitOptions.None);
-
-            if (split.Length == 2)
-            {
-                var name = split[0].Trim();
-                name = ConvertToWindowsFileName(name);
-
-                var bytes = HexStringToBytes(split[1]);
-                var path = Path.Combine(System.IO.Path.GetDirectoryName(Application.ExecutablePath), name);
-                File.WriteAllBytes(path, bytes);
-            }
-        }
-
-        internal IEnumerable<string> ReadLines(string s)
-        {
-            string line;
-            using (var sr = new StringReader(s))
-                while ((line = sr.ReadLine()) != null)
-                    yield return line;
-        }
-
-        private byte[] HexStringToBytes(string hex)
-        {
-            List<byte> byteList = new List<byte>();
-
-            for (int i = 0; i < hex.Length / 2; i++)
-            {
-                string hexNumber = hex.Substring(i * 2, 2);
-                byteList.Add((byte)Convert.ToInt32(hexNumber, 16));
-            }
-
-            byte[] original = byteList.ToArray();
-            return original;
-        }
-
 
         public static string ConvertToWindowsFileName(string urlText, char[] invalidCharsToAllow = null)
         {
@@ -73,7 +29,6 @@ namespace VarBinarySaver
                 invalidCharsToAllow = Array.Empty<char>();
             }
 
-            // get chars that are either not invalid, or are invalid chars to allow
             string invalidCharsRemoved = new string(urlText
               .Where(x => !invalidChars.Contains(x) || invalidCharsToAllow.Contains(x))
               .ToArray());
@@ -81,5 +36,87 @@ namespace VarBinarySaver
             return invalidCharsRemoved;
         }
 
+        private void BtnSelectCsv_Click(object sender, EventArgs e)
+        {
+            using (var ofd = new OpenFileDialog())
+            {
+                ofd.Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*";
+                ofd.Title = "Select CSV File";
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    SetCsvFile(ofd.FileName);
+                }
+            }
+        }
+
+        private void SetCsvFile(string filePath)
+        {
+            _selectedCsvPath = filePath;
+            lblCsvPath.Text = _selectedCsvPath;
+            Log($"Selected CSV: {_selectedCsvPath}");
+            // Set output directory: <csv folder>\\<csv base name> binaries
+            var csvDir = Path.GetDirectoryName(_selectedCsvPath);
+            var csvBase = Path.GetFileNameWithoutExtension(_selectedCsvPath);
+            _outputDir = Path.Combine(csvDir, csvBase + " binaries");
+            Directory.CreateDirectory(_outputDir);
+            Log($"Output directory: {_outputDir}");
+        }
+
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            TextBox.Clear();
+            if (string.IsNullOrWhiteSpace(_selectedCsvPath) || !File.Exists(_selectedCsvPath))
+            {
+                Log("No CSV file selected or file does not exist.");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(_outputDir))
+            {
+                Log("Output directory is not set.");
+                return;
+            }
+            string csvInput = File.ReadAllText(_selectedCsvPath);
+            CsvBinarySaver.SaveBinariesFromCsv(
+                csvInput,
+                _outputDir,
+                name => ConvertToWindowsFileName(name),
+                Log
+            );
+        }
+
+        private void Form1_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length > 0 && Path.GetExtension(files[0]).Equals(".csv", StringComparison.OrdinalIgnoreCase))
+                {
+                    e.Effect = DragDropEffects.Copy;
+                    return;
+                }
+            }
+            e.Effect = DragDropEffects.None;
+        }
+
+        private void Form1_DragDrop(object sender, DragEventArgs e)
+        {
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files.Length > 0 && Path.GetExtension(files[0]).Equals(".csv", StringComparison.OrdinalIgnoreCase))
+            {
+                SetCsvFile(files[0]);
+            }
+        }
+
+        private void Log(string message)
+        {
+            if (TextBox.InvokeRequired)
+            {
+                TextBox.Invoke(new Action(() => Log(message)));
+            }
+            else
+            {
+                TextBox.AppendText(message + Environment.NewLine);
+            }
+        }
     }
 }

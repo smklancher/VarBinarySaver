@@ -6,7 +6,6 @@
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -32,15 +31,21 @@
             this.TextBox = new System.Windows.Forms.TextBox();
             this.SaveButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.btnSelectCsv = new System.Windows.Forms.Button();
+            this.lblCsvPath = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // TextBox
             // 
-            this.TextBox.Location = new System.Drawing.Point(12, 12);
+            this.TextBox.Location = new System.Drawing.Point(12, 41);
+            this.TextBox.MaxLength = 0;
             this.TextBox.Multiline = true;
             this.TextBox.Name = "TextBox";
-            this.TextBox.Size = new System.Drawing.Size(776, 387);
+            this.TextBox.ReadOnly = true;
+            this.TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.TextBox.Size = new System.Drawing.Size(776, 358);
             this.TextBox.TabIndex = 0;
+            this.TextBox.Text = resources.GetString("TextBox.Text");
             // 
             // SaveButton
             // 
@@ -50,22 +55,39 @@
             this.SaveButton.TabIndex = 1;
             this.SaveButton.Text = "Save";
             this.SaveButton.UseVisualStyleBackColor = true;
-            this.SaveButton.Click += new System.EventHandler(this.SaveButton_Click);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 402);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(534, 39);
+            this.label1.Size = new System.Drawing.Size(0, 13);
             this.label1.TabIndex = 2;
-            this.label1.Text = resources.GetString("label1.Text");
+            // 
+            // btnSelectCsv
+            // 
+            this.btnSelectCsv.Location = new System.Drawing.Point(12, 12);
+            this.btnSelectCsv.Name = "btnSelectCsv";
+            this.btnSelectCsv.Size = new System.Drawing.Size(120, 23);
+            this.btnSelectCsv.TabIndex = 3;
+            this.btnSelectCsv.Text = "Select CSV File...";
+            this.btnSelectCsv.UseVisualStyleBackColor = true;
+            // 
+            // lblCsvPath
+            // 
+            this.lblCsvPath.AutoSize = true;
+            this.lblCsvPath.Location = new System.Drawing.Point(138, 17);
+            this.lblCsvPath.Name = "lblCsvPath";
+            this.lblCsvPath.Size = new System.Drawing.Size(0, 13);
+            this.lblCsvPath.TabIndex = 4;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnSelectCsv);
+            this.Controls.Add(this.lblCsvPath);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.SaveButton);
             this.Controls.Add(this.TextBox);
@@ -81,6 +103,8 @@
         private System.Windows.Forms.TextBox TextBox;
         private System.Windows.Forms.Button SaveButton;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnSelectCsv;
+        private System.Windows.Forms.Label lblCsvPath;
     }
 }
 
